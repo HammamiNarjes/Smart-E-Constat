@@ -1,0 +1,86 @@
+/* Appliquer la police Poppins à tout le corps du site */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  background-color: #f5f8fa; /* Couleur douce */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #333;
+}
+
+/* Titres stylisés */
+h1, h2, h3, h4, h5 {
+  font-weight: 600;
+  text-align: center;
+  color: #002a5c; /* Bleu plus profond, lisible et professionnel */
+  margin-bottom: 1rem;
+}
+
+h2 {
+  font-size: 28px;
+}
+
+/* Formulaire principal */
+form {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  max-width: 550px;
+  margin: 30px auto;
+}
+
+/* Champs de formulaire */
+input[type="text"],
+input[type="date"],
+input[type="time"],
+input[type="number"],
+select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  margin-bottom: 18px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+/* Aligner les champs ou textes à gauche si nécessaire */
+.left-align {
+  text-align: left;
+}
+
+/* Labels */
+label {
+  display: block;
+  font-weight: 500;
+  color: #004080;
+  margin-bottom: 5px;
+}
+
+/* Boutons */
+button {
+  padding: 10px 22px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+  margin-top: 10px;
+  margin-right: 10px;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Style spécifique si tu veux encadrer ou styliser un taux */
+.taux-container {
+  text-align: left;
+  font-size: 1rem;
+  color: #003366;
+  margin-bottom: 16px;
+}
