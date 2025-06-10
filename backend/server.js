@@ -11,7 +11,7 @@ const pool = new Pool({
   user: 'postgres',
   host: 'localhost',
   database: 'E_constat',
-  password: 'narjes',
+  password: 'root', //change to narjes 
   port: 5432,
 });
 
@@ -143,9 +143,14 @@ app.post('/api/sinistres', async (req, res) => {
 
   try {
     console.log('Validation des données reçues...');
-    const { nom, prenom, type, immatriculation } = req.body;
+    
+    // Extraction de tous les champs attendus
+    const {
+      nom, prenom, type, immatriculation,
+      date, heure, lieu
+    } = req.body;
 
-    // Vérification minimale des champs requis
+    // Vérification des champs requis
     if (!nom || !prenom || !type || !immatriculation || !date || !heure || !lieu) {
       return res.status(400).json({
         error: 'Certains champs requis sont manquants.',
@@ -169,12 +174,12 @@ app.post('/api/sinistres', async (req, res) => {
         date_accident, heure_accident, lieu, degats_materiels, blesses,
         societe_assurance_a, police_assurance_a, nom_conducteur_a, prenom_conducteur_a,
         numero_permis_a, date_delivrance_permis_a, type_vehicule_a, immatriculation_a,
-        circonstance_a, 
+        circonstance_a,
         societe_assurance_b, police_assurance_b, nom_conducteur_b, prenom_conducteur_b,
         numero_permis_b, date_delivrance_permis_b, type_vehicule_b, immatriculation_b,
         circonstance_b
       ) VALUES (
-        $1, ${2}, $3, $4, $5,
+        $1, $2, $3, $4, $5,
         $6, $7, $8, $9,
         $10, $11, $12, $13,
         $14,
@@ -186,29 +191,29 @@ app.post('/api/sinistres', async (req, res) => {
     `;
 
     const values = [
-      dateAccident.toISOString().split('T')[0], // $1: date_accident
-      heure,                                     // $2: heure_accident
-      lieu,                                      // $3: lieu
-      null,                                      // $4: degats_materiels
-      null,                                      // $5: blesses
-      null,                                      // $6: societe_assurance_a
-      null,                                      // $7: police_assurance_a
-      nom,                                       // $8: nom_conducteur_a
-      prenom,                                    // $9: prenom_conducteur_a
-      null,                                      // $10: numero_permis_a
-      null,                                      // $11: date_delivrance_permis_a
-      type,                                      // $12: type_vehicule_a
-      immatriculation,                           // $13: immatriculation_a
-      null,                                      // $14: circonstance_a
-      null,                                      // $15: societe_assurance_b
-      null,                                      // $16: police_assurance_b
-      null,                                      // $17: nom_conducteur_b
-      null,                                      // $18: prenom_conducteur_b
-      null,                                      // $19: numero_permis_b
-      null,                                      // $20: date_delivrance_permis_b
-      null,                                      // $21: type_vehicule_b
-      null,                                      // $22: immatriculation_b
-      null                                       // $23: circonstance_b
+      dateAccident.toISOString().split('T')[0], // $1 : date_accident
+      heure,                                    // $2 : heure_accident
+      lieu,                                     // $3 : lieu
+      null,                                     // $4 : degats_materiels
+      null,                                     // $5 : blesses
+      null,                                     // $6 : societe_assurance_a
+      null,                                     // $7 : police_assurance_a
+      nom,                                      // $8 : nom_conducteur_a
+      prenom,                                   // $9 : prenom_conducteur_a
+      null,                                     // $10 : numero_permis_a
+      null,                                     // $11 : date_delivrance_permis_a
+      type,                                     // $12 : type_vehicule_a
+      immatriculation,                          // $13 : immatriculation_a
+      null,                                     // $14 : circonstance_a
+      null,                                     // $15 : societe_assurance_b
+      null,                                     // $16 : police_assurance_b
+      null,                                     // $17 : nom_conducteur_b
+      null,                                     // $18 : prenom_conducteur_b
+      null,                                     // $19 : numero_permis_b
+      null,                                     // $20 : date_delivrance_permis_b
+      null,                                     // $21 : type_vehicule_b
+      null,                                     // $22 : immatriculation_b
+      null                                      // $23 : circonstance_b
     ];
 
     const result = await client.query(query, values);
@@ -223,7 +228,7 @@ app.post('/api/sinistres', async (req, res) => {
 
   } catch (err) {
     if (client) await client.query('ROLLBACK');
-    console.error('❌ Erreur lors de l\'enregistrement:', err.stack);
+    console.error('❌ Erreur lors de l\'enregistrement :', err.stack);
     res.status(500).json({
       success: false,
       error: 'Erreur serveur',
@@ -233,6 +238,7 @@ app.post('/api/sinistres', async (req, res) => {
     if (client) client.release();
   }
 });
+
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
