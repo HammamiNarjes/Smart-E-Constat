@@ -48,22 +48,29 @@ app.post('/api/sinistres', async (req, res) => {
     const {
       nom, prenom, type, immatriculation,
       date, heure, lieu, degats, blesses, societe, police, permis, dateDelivrance, circSelected,
-      societeB, policeB, nomPrenomB, permisB, dateDelivranceB, typeB, immatriculationB, circSelectedB
+      societeB, policeB ,nomB ,prenomB , permisB, dateDelivranceB, typeB, immatriculationB, circSelectedB
     } = req.body;
 
     // Vérification des champs requis
  
-    if (!nom || !prenom || !type || !immatriculation || !date || !heure || !lieu || !degats || !blesses || !societe || !police || !permis
-      || !dateDelivrance || !circSelected || !societeB || !policeB || !nomPrenomB || !permisB || !dateDelivranceB || !typeB || !immatriculationB || !circSelectedB
-    ) {
-      return res.status(400).json({
-        error: 'Certains champs requis sont manquants.',
-        requiredFields: ['nom', 'prenom', 'type', 'immatriculation', 'date', 'heure', 'lieu',
-        'degats', 'blesses', 'societe', 'police', 'permis', 'dateDelivrance', 'circSelected',
-        'societeB', 'policeB', 'nomPrenomB', 'permisB', 'dateDelivranceB',
-        'typeB', 'immatriculationB', 'circSelectedB']
-      });
-    }
+   const requiredFields = [
+  'nom', 'prenom', 'type', 'immatriculation', 'date', 'heure', 'lieu',
+  'degats', 'blesses', 'societe', 'police', 'permis', 'dateDelivrance', 'circSelected',
+  'societeB', 'policeB', 'nomB', 'prenomB', 'permisB', 'dateDelivranceB',
+  'typeB', 'immatriculationB', 'circSelectedB'
+];
+
+  // Vérification des champs manquants
+   const missingFields = requiredFields.filter(field =>
+  req.body[field] === undefined || req.body[field] === null || req.body[field] === ''
+);
+
+if (missingFields.length > 0) {
+  return res.status(400).json({
+    error: 'Certains champs requis sont manquants.',
+    requiredFields: missingFields
+  });
+}
 
     // Validation de la date
     const dateAccident = new Date(date);
@@ -71,10 +78,7 @@ app.post('/api/sinistres', async (req, res) => {
       return res.status(400).json({ error: 'Format de date invalide' });
     }
 
-    // Séparation du nom et prénom pour la partie B
-    const parts = nomPrenomB.trim().split(/\s+/);
-    const prenomB = parts.pop();         // dernier mot
-    const nomB = parts.join(' ');        // tout le reste
+    
 
     client = await pool.connect();
     await client.query('BEGIN');
@@ -114,8 +118,8 @@ app.post('/api/sinistres', async (req, res) => {
       circSelected,                             // $14 : circonstance_a
       societeB,                                 // $15 : societe_assurance_b
       policeB,                                  // $16 : police_assurance_b
-      nomB || '',                               // $17 : nom_conducteur_b
-      prenomB || '',                            // $18 : prenom_conducteur_b
+      nomB ,                               // $17 : nom_conducteur_b
+      prenomB ,                            // $18 : prenom_conducteur_b
       permisB,                                  // $19 : numero_permis_b
       dateDelivranceB,                          // $20 : date_delivrance_permis_b
       typeB,                                    // $21 : type_vehicule_b
