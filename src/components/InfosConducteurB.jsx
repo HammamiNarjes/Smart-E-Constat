@@ -1,163 +1,179 @@
-import React, { useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { SinistreContext } from '../contexts/SinistreContext';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-const InfosConducteurB = () => {
-  const [societe, setSociete] = useState('');
-  const [police, setPolice] = useState('');
-  const [nomPrenom, setNomPrenom] = useState('');
-  const [permis, setPermis] = useState('');
-  const [dateDelivrance, setDateDelivrance] = useState('');
+function InfosConducteurB() {
   const navigate = useNavigate();
+  const { formData, updateFormData } = useContext(SinistreContext);
+
+  const [localForm, setLocalForm] = useState({
+    nomB: formData.nomB || '',
+    prenomB: formData.prenomB || '',
+    societeB: formData.societeB || '',
+    policeB: formData.policeB || '',
+    permisB: formData.permisB || '',
+    dateDelivranceB: formData.dateDelivranceB || '',
+    declarationB: formData.declarationB || '',
+  });
+
+  const [isValid, setIsValid] = useState(false);
+
+  useEffect(() => {
+    // Validation : tous les champs doivent être remplis (non vides, sans espaces)
+    const allFilled = Object.values(localForm).every(val => val.trim() !== '');
+    setIsValid(allFilled);
+  }, [localForm]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setLocalForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!isValid) {
+      alert('Veuillez remplir tous les champs.');
+      return;
+    }
+
+    if (typeof updateFormData === 'function') {
+      // Si updateFormData attend 2 arguments (clé, valeur)
+      if (updateFormData.length === 2) {
+        Object.entries(localForm).forEach(([key, value]) => {
+          updateFormData(key, value);
+        });
+      } else {
+        // Sinon, on passe tout l'objet d'un coup
+        updateFormData(localForm);
+      }
+    }
+
+    navigate('/vehicule-b');
+  };
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #e3f2fd, #ffffff)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        fontFamily: "'Poppins', sans-serif",
-        padding: '20px',
-      }}
-    >
-      <div
-        style={{
-          width: '100%',
-          maxWidth: '480px',
-          background: 'rgba(255, 255, 255, 0.85)',
-          boxShadow: '0 8px 32px rgba(31, 38, 135, 0.1)',
-          backdropFilter: 'blur(8px)',
-          borderRadius: '16px',
-          border: '1px solid rgba(0, 0, 0, 0.1)',
-          padding: '30px',
-        }}
-      >
-        <h2
-          className="text-center mb-3"
-          style={{ color: '#003f7f', fontWeight: '700', fontSize: '1.6rem', marginBottom: '1rem' }}
-        >
-          Informations du conducteur B
-        </h2>
+    <div className="container mt-4" style={{ maxWidth: '700px', fontFamily: "'Poppins', sans-serif" }}>
+      <h2 className="mb-4 text-primary">Informations du Conducteur B</h2>
+      <form onSubmit={handleSubmit}>
 
-        <label className="fw-semibold" style={{ display: 'block', marginBottom: '6px' }}>
-          Nom et prénom :
-        </label>
-        <input
-          type="text"
-          value={nomPrenom}
-          onChange={(e) => setNomPrenom(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            borderRadius: '8px',
-            border: '1px solid #ccc',
-            marginBottom: '16px',
-            fontSize: '1rem',
-          }}
-        />
+        <div className="mb-3">
+          <label htmlFor="nomB" className="form-label">Nom :</label>
+          <input
+            type="text"
+            id="nomB"
+            name="nomB"
+            value={localForm.nomB}
+            onChange={handleChange}
+            required
+            className="form-control"
+            placeholder="Nom du conducteur B"
+          />
+        </div>
 
-        <label className="fw-semibold" style={{ display: 'block', marginBottom: '6px' }}>
-          Société d'assurance :
-        </label>
-        <input
-          type="text"
-          value={societe}
-          onChange={(e) => setSociete(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            borderRadius: '8px',
-            border: '1px solid #ccc',
-            marginBottom: '16px',
-            fontSize: '1rem',
-          }}
-        />
+        <div className="mb-3">
+          <label htmlFor="prenomB" className="form-label">Prénom :</label>
+          <input
+            type="text"
+            id="prenomB"
+            name="prenomB"
+            value={localForm.prenomB}
+            onChange={handleChange}
+            required
+            className="form-control"
+            placeholder="Prénom du conducteur B"
+          />
+        </div>
 
-        <label className="fw-semibold" style={{ display: 'block', marginBottom: '6px' }}>
-          Police d'assurance :
-        </label>
-        <input
-          type="text"
-          value={police}
-          onChange={(e) => setPolice(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            borderRadius: '8px',
-            border: '1px solid #ccc',
-            marginBottom: '16px',
-            fontSize: '1rem',
-          }}
-        />
+        <div className="mb-3">
+          <label htmlFor="societeB" className="form-label">Société d'assurance :</label>
+          <input
+            type="text"
+            id="societeB"
+            name="societeB"
+            value={localForm.societeB}
+            onChange={handleChange}
+            required
+            className="form-control"
+            placeholder="Société d'assurance du conducteur B"
+          />
+        </div>
 
-        <label className="fw-semibold" style={{ display: 'block', marginBottom: '6px' }}>
-          Numéro de permis :
-        </label>
-        <input
-          type="text"
-          value={permis}
-          onChange={(e) => setPermis(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            borderRadius: '8px',
-            border: '1px solid #ccc',
-            marginBottom: '16px',
-            fontSize: '1rem',
-          }}
-        />
+        <div className="mb-3">
+          <label htmlFor="policeB" className="form-label">Police d'assurance :</label>
+          <input
+            type="text"
+            id="policeB"
+            name="policeB"
+            value={localForm.policeB}
+            onChange={handleChange}
+            required
+            className="form-control"
+            placeholder="Numéro de police d'assurance"
+          />
+        </div>
 
-        <label className="fw-semibold" style={{ display: 'block', marginBottom: '6px' }}>
-          Délivré le :
-        </label>
-        <input
-          type="date"
-          value={dateDelivrance}
-          onChange={(e) => setDateDelivrance(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            borderRadius: '8px',
-            border: '1px solid #ccc',
-            marginBottom: '24px',
-            fontSize: '1rem',
-          }}
-        />
+        <div className="mb-3">
+          <label htmlFor="permisB" className="form-label">Numéro de permis :</label>
+          <input
+            type="text"
+            id="permisB"
+            name="permisB"
+            value={localForm.permisB}
+            onChange={handleChange}
+            required
+            className="form-control"
+            placeholder="Numéro de permis"
+          />
+        </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div className="mb-3">
+          <label htmlFor="dateDelivranceB" className="form-label">Délivré le :</label>
+          <input
+            type="date"
+            id="dateDelivranceB"
+            name="dateDelivranceB"
+            value={localForm.dateDelivranceB}
+            onChange={handleChange}
+            required
+            className="form-control"
+          />
+        </div>
+
+        <div className="mb-4">
+          <label htmlFor="declarationB" className="form-label">Déclaration du conducteur :</label>
+          <textarea
+            id="declarationB"
+            name="declarationB"
+            value={localForm.declarationB}
+            onChange={handleChange}
+            rows="4"
+            required
+            className="form-control"
+            placeholder="Décrivez ce qui s'est passé lors de l'accident"
+          />
+        </div>
+
+        <div className="d-flex justify-content-between">
           <button
+            type="button"
             onClick={() => navigate('/vehicule-a')}
-            style={{
-              backgroundColor: '#aaa',
-              color: 'white',
-              borderRadius: '30px',
-              padding: '8px 20px',
-              fontWeight: 'bold',
-              border: 'none',
-              cursor: 'pointer',
-            }}
+            className="btn btn-secondary"
           >
             Précédent
           </button>
           <button
-            onClick={() => navigate('/vehicule-b')}
-            style={{
-              backgroundColor: '#003f7f',
-              color: 'white',
-              borderRadius: '30px',
-              padding: '8px 20px',
-              fontWeight: 'bold',
-              border: 'none',
-              cursor: 'pointer',
-            }}
+            type="submit"
+            disabled={!isValid}
+            className={`btn ${isValid ? 'btn-primary' : 'btn-primary disabled'}`}
           >
             Suivant
           </button>
         </div>
-      </div>
+      </form>
     </div>
   );
-};
+}
 
 export default InfosConducteurB;

@@ -1,10 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { SinistreContext } from '../contexts/SinistreContext';
 
 const InfosVehiculeB = () => {
-  const [type, setType] = useState('');
-  const [immatriculation, setImmatriculation] = useState('');
   const navigate = useNavigate();
+  const { formData, updateFormData } = useContext(SinistreContext);
+
+  // État local initialisé depuis le contexte
+  const [localForm, setLocalForm] = useState({
+    typeB: formData.typeB || '',
+    immatriculationB: formData.immatriculationB || '',
+  });
+
+  // Validation simple : champs non vides
+  const [isValid, setIsValid] = useState(false);
+  useEffect(() => {
+    setIsValid(
+      localForm.typeB.trim() !== '' && localForm.immatriculationB.trim() !== ''
+    );
+  }, [localForm]);
+
+  // Gestion changement input
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setLocalForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Soumission formulaire
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!isValid) {
+      alert('Veuillez remplir tous les champs.');
+      return;
+    }
+    // Mise à jour individuelle des champs dans le contexte
+    updateFormData('typeB', localForm.typeB);
+    updateFormData('immatriculationB', localForm.immatriculationB);
+
+    navigate('/circonstance-b');
+  };
 
   return (
     <div
@@ -42,70 +76,90 @@ const InfosVehiculeB = () => {
           Informations du véhicule - Conducteur B
         </h2>
 
-        <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600' }}>
-          Type de véhicule :
-        </label>
-        <input
-          type="text"
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            borderRadius: '8px',
-            border: '1px solid #ccc',
-            marginBottom: '16px',
-            fontSize: '1rem',
-          }}
-        />
-
-        <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600' }}>
-          Numéro d'immatriculation :
-        </label>
-        <input
-          type="text"
-          value={immatriculation}
-          onChange={(e) => setImmatriculation(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px',
-            borderRadius: '8px',
-            border: '1px solid #ccc',
-            marginBottom: '24px',
-            fontSize: '1rem',
-          }}
-        />
-
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <button
-            onClick={() => navigate('/conducteur-b')}
-            style={{
-              backgroundColor: '#aaa',
-              color: 'white',
-              borderRadius: '30px',
-              padding: '8px 20px',
-              fontWeight: 'bold',
-              border: 'none',
-              cursor: 'pointer',
-            }}
+        <form onSubmit={handleSubmit}>
+          <label
+            htmlFor="typeB"
+            style={{ display: 'block', marginBottom: '6px', fontWeight: '600' }}
           >
-            Précédent
-          </button>
-          <button
-            onClick={() => navigate('/circonstance-b')}
+            Type de véhicule :
+          </label>
+          <input
+            id="typeB"
+            name="typeB"
+            type="text"
+            value={localForm.typeB}
+            onChange={handleChange}
             style={{
-              backgroundColor: '#003f7f',
-              color: 'white',
-              borderRadius: '30px',
-              padding: '8px 20px',
-              fontWeight: 'bold',
-              border: 'none',
-              cursor: 'pointer',
+              width: '100%',
+              padding: '10px',
+              borderRadius: '8px',
+              border: '1px solid #ccc',
+              marginBottom: '16px',
+              fontSize: '1rem',
             }}
+            placeholder="Ex : Voiture, Camion..."
+            required
+          />
+
+          <label
+            htmlFor="immatriculationB"
+            style={{ display: 'block', marginBottom: '6px', fontWeight: '600' }}
           >
-            Suivant
-          </button>
-        </div>
+            Numéro d'immatriculation :
+          </label>
+          <input
+            id="immatriculationB"
+            name="immatriculationB"
+            type="text"
+            value={localForm.immatriculationB}
+            onChange={handleChange}
+            style={{
+              width: '100%',
+              padding: '10px',
+              borderRadius: '8px',
+              border: '1px solid #ccc',
+              marginBottom: '24px',
+              fontSize: '1rem',
+            }}
+            placeholder="Ex : 123 TU 456"
+            required
+          />
+
+          <div
+            style={{ display: 'flex', justifyContent: 'space-between' }}
+          >
+            <button
+              type="button"
+              onClick={() => navigate('/conducteur-b')}
+              style={{
+                backgroundColor: '#aaa',
+                color: 'white',
+                borderRadius: '30px',
+                padding: '8px 20px',
+                fontWeight: 'bold',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              Précédent
+            </button>
+            <button
+              type="submit"
+              disabled={!isValid}
+              style={{
+                backgroundColor: isValid ? '#003f7f' : '#7a8ba6',
+                color: 'white',
+                borderRadius: '30px',
+                padding: '8px 20px',
+                fontWeight: 'bold',
+                border: 'none',
+                cursor: isValid ? 'pointer' : 'default',
+              }}
+            >
+              Suivant
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

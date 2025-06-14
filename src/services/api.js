@@ -1,63 +1,58 @@
 export const saveSinistre = async (formData) => {
   try {
-    // Construction de l'objet complet avec valeurs par défaut
-    const sinistreData = {
-      conducteurA: {
-        nom: formData.conducteurA?.nom || '',
-        prenom: formData.conducteurA?.prenom || '',
-        permis: formData.conducteurA?.permis || null,
-        dateDelivrance: formData.conducteurA?.dateDelivrance || null,
-        societe: formData.conducteurA?.societe || null,
-        police: formData.conducteurA?.police || null
-      },
-      vehiculeA: {
-        type: formData.vehiculeA?.type || '',
-        immatriculation: formData.vehiculeA?.immatriculation || ''
-      },
-      conducteurB: formData.conducteurB ? {
-        nom: formData.conducteurB.nom || null,
-        prenom: formData.conducteurB.prenom || null,
-        permis: formData.conducteurB.permis || null,
-        dateDelivrance: formData.conducteurB.dateDelivrance || null,
-        societe: formData.conducteurB.societe || null,
-        police: formData.conducteurB.police || null
-      } : null,
-      vehiculeB: formData.vehiculeB ? {
-        type: formData.vehiculeB.type || null,
-        immatriculation: formData.vehiculeB.immatriculation || null
-      } : null,
-      circonstances: {
-        date: formData.circonstances?.date || '',
-        heure: formData.circonstances?.heure || '',
-        lieu: formData.circonstances?.lieu || '',
-        degats: formData.circonstances?.degats || 'non',
-        blesses: formData.circonstances?.blesses || 'non',
-        circonstanceA: formData.circonstances?.circonstanceA || '',
-        circonstanceB: formData.circonstances?.circonstanceB || null
-      },
-      croquis: formData.croquis || null
-    };
+    // Convertir les booléens
+    const degats = formData.degats === true || formData.degats === 'true';
+    const blesses = formData.blesses === true || formData.blesses === 'true';
 
-    console.log('Envoi des données au serveur:', sinistreData);
+    // 1. Construction MANUELLE du payload
+    const payload = {
+      // Conducteur A
+      nom: formData.nom || '',
+      prenom: formData.prenom || '',
+      permis: formData.permis || '',
+      dateDelivrance: formData.dateDelivrance || '',
+      type: formData.type || '',
+      immatriculation: formData.immatriculation || '',
+      societe: formData.societe || '',
+      police: formData.police || '',
+      circSelected: formData.circSelected || '',
+
+      // Conducteur B - Champs SÉPARÉS
+      nomB: formData.nomB || '',  // Champ individuel
+      prenomB: formData.prenomB || '',  // Champ individuel
+      permisB: formData.permisB || '',
+      dateDelivranceB: formData.dateDelivranceB || '',
+      typeB: formData.typeB || '',
+      immatriculationB: formData.immatriculationB || '',
+      societeB: formData.societeB || '',
+      policeB: formData.policeB || '',
+      circSelectedB: formData.circSelectedB || '',
+
+       // Accident - 
+      date: formData.date || new Date().toISOString().split('T')[0], // valeur par défaut aujourd'hui
+      heure: formData.heure || '12:00', // valeur par défaut
+      lieu: formData.lieu || 'Non spécifié',
+      degats: degats,
+      blesses: blesses
+    };
+    
+
+
+
+    console.log('Payload final envoyé:', JSON.stringify(payload, null, 2));
+
+    // 3. Envoi au serveur
     const response = await fetch('http://localhost:3001/api/sinistres', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(sinistreData)
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Erreur lors de la sauvegarde');
-    }
-
+    if (!response.ok) throw new Error(await response.text());
     return await response.json();
+
   } catch (error) {
-    console.error('Erreur dans saveSinistre:', {
-      message: error.message,
-      stack: error.stack
-    });
+    console.error('Erreur côté client:', error);
     throw error;
   }
 };

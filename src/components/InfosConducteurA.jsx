@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { SinistreContext } from '../contexts/SinistreContext'; // ← Import du contexte
 
 function InfosConducteurA() {
   const navigate = useNavigate();
@@ -12,9 +13,30 @@ function InfosConducteurA() {
   const [dateDelivrance, setDateDelivrance] = useState('');
   const [declaration, setDeclaration] = useState('');
 
+  const { updateFormData } = useContext(SinistreContext); // ← Utilisation du contexte
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(societe, police, nom, prenom, permis, dateDelivrance, declaration);
+
+    // Mettre à jour les données dans le contexte
+    updateFormData('societe', societe);
+    updateFormData('police', police);
+    updateFormData('nom', nom);
+    updateFormData('prenom', prenom);
+    updateFormData('permis', permis);
+    updateFormData('dateDelivrance', dateDelivrance);
+    updateFormData('declaration', declaration); // Optionnel, si ce champ est utilisé dans le backend
+
+    console.log('✅ Données envoyées au contexte :', {
+      societe,
+      police,
+      nom,
+      prenom,
+      permis,
+      dateDelivrance,
+      declaration
+    });
+
     navigate('/vehicule-a');
   };
 

@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react'; // J'ai ajouté useState et useEffect ici
+import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SinistreContext } from '../contexts/SinistreContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -6,25 +6,23 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 function IdentificationConducteur() {
   const navigate = useNavigate();
   const { formData, updateFormData } = useContext(SinistreContext);
-  
-  const [nom, setNom] = useState(formData.conducteurA.nom || '');
-  const [prenom, setPrenom] = useState(formData.conducteurA.prenom || '');
-  const [cin, setCIN] = useState(formData.conducteurA.permis || '');
+
+  const [nomID, setNomID] = useState(formData.conducteurA?.nom || '');
+  const [prenomID, setPrenomID] = useState(formData.conducteurA?.prenom || '');
+  const [cin, setCIN] = useState(formData.conducteurA?.permis || '');
   const [isValid, setIsValid] = useState(false);
 
   useEffect(() => {
-    setIsValid(nom.trim() && prenom.trim() && cin.trim());
-  }, [nom, prenom, cin]);
+    setIsValid(nomID.trim() && prenomID.trim() && cin.trim());
+  }, [nomID, prenomID, cin]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // Mise à jour du contexte
+
     updateFormData('conducteurA', {
-      nom,
-      prenom,
+      nom: nomID,
+      prenom: prenomID,
       permis: cin,
-      // Ajoutez d'autres champs si nécessaire
     });
 
     navigate('/circonstances');
@@ -62,39 +60,33 @@ function IdentificationConducteur() {
 
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
-            <label htmlFor="nom" className="form-label fw-semibold">
-              Nom
-            </label>
+            <label htmlFor="nom" className="form-label fw-semibold">Nom</label>
             <input
               type="text"
               className="form-control rounded-pill"
               id="nom"
               placeholder="Entrez votre nom"
-              value={nom}
-              onChange={(e) => setNom(e.target.value)}
+              value={nomID}
+              onChange={(e) => setNomID(e.target.value)}
               required
             />
           </div>
 
           <div className="mb-3">
-            <label htmlFor="prenom" className="form-label fw-semibold">
-              Prénom
-            </label>
+            <label htmlFor="prenom" className="form-label fw-semibold">Prénom</label>
             <input
               type="text"
               className="form-control rounded-pill"
               id="prenom"
               placeholder="Entrez votre prénom"
-              value={prenom}
-              onChange={(e) => setPrenom(e.target.value)}
+              value={prenomID}
+              onChange={(e) => setPrenomID(e.target.value)}
               required
             />
           </div>
 
           <div className="mb-4">
-            <label htmlFor="cin" className="form-label fw-semibold">
-              Numéro de permis
-            </label>
+            <label htmlFor="cin" className="form-label fw-semibold">Numéro de permis</label>
             <input
               type="text"
               className="form-control rounded-pill"

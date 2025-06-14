@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { SinistreContext } from '../contexts/SinistreContext';
 
 const ChoixCirconstanceUnique = () => {
-  const [circSelected, setCircSelected] = useState('');
   const navigate = useNavigate();
+  const { formData, updateFormData } = useContext(SinistreContext);
 
   const circonstances = [
     '1- En stationnement',
@@ -26,8 +27,8 @@ const ChoixCirconstanceUnique = () => {
   ];
 
   const handleNext = () => {
-    if (circSelected) {
-      alert(`Circonstance choisie : ${circSelected}`);
+    if (formData.circSelected) {
+      alert(`Circonstance choisie : ${formData.circSelected}`);
       navigate('/conducteur-b');
     } else {
       alert("Veuillez choisir une circonstance.");
@@ -44,8 +45,8 @@ const ChoixCirconstanceUnique = () => {
             id={`circ-${index}`}
             name="circonstance"
             value={phrase}
-            checked={circSelected === phrase}
-            onChange={() => setCircSelected(phrase)}
+            checked={formData.circSelected === phrase}
+            onChange={() => updateFormData('circSelected', phrase)}
           />
           <label htmlFor={`circ-${index}`}>{phrase}</label>
         </div>

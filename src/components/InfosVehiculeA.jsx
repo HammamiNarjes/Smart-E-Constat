@@ -1,17 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { SinistreContext } from '../contexts/SinistreContext';
 
 const InfosVehiculeA = () => {
-  const [type, setType] = useState('');
-  const [immatriculation, setImmatriculation] = useState('');
   const navigate = useNavigate();
+  const { formData, updateFormData } = useContext(SinistreContext);
 
+  // Initialiser local state avec valeurs du contexte ou vide
+  const [localForm, setLocalForm] = useState({
+    type: formData.type || '',
+    immatriculation: formData.immatriculation || '',
+  });
+
+  // Validation : champs requis
+  const [isValid, setIsValid] = useState(false);
+  useEffect(() => {
+    setIsValid(localForm.type.trim() !== '' && localForm.immatriculation.trim() !== '');
+  }, [localForm]);
+
+  // Mise à jour du formulaire local
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setLocalForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Soumission du formulaire
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!type || !immatriculation) {
+    if (!isValid) {
       alert('Veuillez remplir tous les champs');
       return;
     }
+    // Mise à jour individuelle des champs dans le contexte
+    updateFormData('type', localForm.type);
+    updateFormData('immatriculation', localForm.immatriculation);
+
     navigate('/choix-circonstance');
   };
 
@@ -47,9 +70,10 @@ const InfosVehiculeA = () => {
             <label className="form-label fw-semibold">Type de véhicule :</label>
             <input
               type="text"
+              name="type"
               className="form-control rounded-pill"
-              value={type}
-              onChange={(e) => setType(e.target.value)}
+              value={localForm.type}
+              onChange={handleChange}
               placeholder="Ex : Voiture, Camion..."
               required
             />
@@ -59,9 +83,10 @@ const InfosVehiculeA = () => {
             <label className="form-label fw-semibold">Numéro d'immatriculation :</label>
             <input
               type="text"
+              name="immatriculation"
               className="form-control rounded-pill"
-              value={immatriculation}
-              onChange={(e) => setImmatriculation(e.target.value)}
+              value={localForm.immatriculation}
+              onChange={handleChange}
               placeholder="Ex : 123 TU 456"
               required
             />
@@ -79,6 +104,7 @@ const InfosVehiculeA = () => {
               type="submit"
               className="btn btn-primary rounded-pill px-4"
               style={{ backgroundColor: '#003f7f', borderColor: '#003f7f' }}
+              disabled={!isValid}
             >
               Suivant
             </button>
