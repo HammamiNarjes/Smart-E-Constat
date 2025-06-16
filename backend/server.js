@@ -52,12 +52,12 @@ app.post('/api/sinistres', async (req, res) => {
       'degats', 'blesses', 'societe', 'police', 'permis', 'dateDelivrance', 'circSelected'
     ];
 
-    // Extraction des champs depuis req.body (et non 'body' seul)
+    // Extraction des champs depuis req.body 
     const {
       nom, prenom, type, immatriculation,
       date, heure, lieu, degats, blesses,
       societe, police, permis, dateDelivrance, circSelected,
-      societeB, policeB, nomB, prenomB, permisB, dateDelivranceB, typeB, immatriculationB, circSelectedB
+      societeB, policeB, nomB, prenomB, permisB, dateDelivranceB, typeB, immatriculationB, circSelectedB, declaration, declarationB
     } = req.body;
 
     // Validation des champs obligatoires (utiliser req.body)
@@ -99,7 +99,10 @@ app.post('/api/sinistres', async (req, res) => {
       dateDelivranceB || null,                    // $20
       typeB || null,                              // $21
       immatriculationB || null,                   // $22
-      circSelectedB || null                       // $23
+      circSelectedB || null,                       // $23
+      declaration || null,  
+      declarationB || null,
+
     ];
 
     console.log('Valeurs préparées pour insertion:', values);
@@ -115,8 +118,8 @@ app.post('/api/sinistres', async (req, res) => {
         circonstance_a,
         societe_assurance_b, police_assurance_b, nom_conducteur_b, prenom_conducteur_b,
         numero_permis_b, date_delivrance_permis_b, type_vehicule_b, immatriculation_b,
-        circonstance_b
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
+        circonstance_b, declaration_a ,declaration_b
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23,$24,$25)
       RETURNING id;
     `;
 
