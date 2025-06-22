@@ -4,8 +4,12 @@ const cors = require('cors');
 
 const app = express();
 
-// Middleware CORS 
-app.use(cors());
+// Configuration CORS plus permissive pour le développement
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type']
+}));
 
 // Middleware pour parser le JSON du corps de la requête
 app.use(express.json());
@@ -152,10 +156,43 @@ app.post('/api/sinistres', async (req, res) => {
   }
 });
 
-// Démarrer le serveur
-const PORT = 3001;
-app.listen(PORT, () => {
-  console.log(`\n🚀 Serveur démarré sur http://localhost:${PORT}`);
-  console.log('🔍 Mode debug:', process.env.NODE_ENV || 'development');
+// Test de connexion DB
+pool.query('SELECT NOW()')
+  .then(() => console.log('✅ Connecté à PostgreSQL'))
+  .catch(err => console.error('❌ Erreur de connexion DB:', err));
+
+// Route GET pour récupérer un sinistre
+app.get('/api/sinistres/:id', async (req, res) => {
+  const { id } = req.params;
+  console.log(`🔍 Requête pour sinistre ID: ${id}`);
+
+  try {
+    const result = await pool.query('SELECT * FROM sinistres WHERE id = $1', [id]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Sinistre non trouvé' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Erreur:', err);
+    res.status(500).json({ 
+      error: 'Erreur serveur',
+      details: err.message 
+    });
+  }
 });
 
+// Route POST factice pour la prédiction (à implémenter plus tard)
+app.post('/api/predict/:id', (req, res) => {
+  console.log(`Prédiction demandée pour sinistre ID: ${req.params.id}`);
+  res.json({ 
+    message: "Fonctionnalité de prédiction à implémenter",
+    id: req.params.id
+  });
+});
+
+const PORT = 3001;
+app.listen(PORT, () => {
+  console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
+});

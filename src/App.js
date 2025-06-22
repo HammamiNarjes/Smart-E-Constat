@@ -11,6 +11,7 @@ import ChoixCirconstanceB from './components/ChoixCirconstanceB';
 import Croquis from './components/Croquis';
 import VerificationPage from './components/VerificationPage';  
 import FinalPage from './components/FinalPage';
+import AgentAssurance from './components/AgentAssurance';
 import { SinistreProvider } from './contexts/SinistreContext';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -30,6 +31,7 @@ function App() {
           <Route path="/croquis" element={<Croquis />} />
           <Route path="/verification" element={<VerificationPage />} />
           <Route path="/final" element={<FinalPage />} />
+          <Route path="/agent" element={<AgentAssurance />} />
         </Routes>
       </Router>
     </SinistreProvider>

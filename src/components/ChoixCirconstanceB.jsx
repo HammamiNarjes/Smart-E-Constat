@@ -53,6 +53,7 @@ const ChoixCirconstanceB = () => {
         immatriculation: formData.immatriculation || '',
         societe: formData.societe || '',
         police: formData.police || '',
+        declaration: formData.declaration || '',
         circSelected: formData.circSelected || '',
 
         // Conducteur B
@@ -64,6 +65,7 @@ const ChoixCirconstanceB = () => {
         immatriculationB: formData.immatriculationB || '',
         societeB: formData.societeB || '',
         policeB: formData.policeB || '',
+        declarationB: formData.declarationB || '',
         circSelectedB: circSelectedB, 
         // Accident
         date: formData.date || '',

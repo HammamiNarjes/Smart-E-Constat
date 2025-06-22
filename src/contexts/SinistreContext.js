@@ -9,6 +9,7 @@ export const SinistreProvider = ({ children }) => {
     prenom: '',
     permis: '',
     dateDelivrance: '',
+    declaration:  '',
     // Véhicule A
     type: '',
     immatriculation: '',
@@ -27,6 +28,7 @@ export const SinistreProvider = ({ children }) => {
     prenomB: '',
     permisB: '',
     dateDelivranceB: '',
+    declarationB: '',
     // Véhicule B
     typeB: '',
     immatriculationB: '',

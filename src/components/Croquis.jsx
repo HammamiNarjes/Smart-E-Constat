@@ -1,13 +1,15 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useContext } from 'react';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useNavigate } from 'react-router-dom';
+import { SinistreContext } from '../contexts/SinistreContext';
 
 const ItemTypes = {
   ELEMENT: 'element',
 };
 
-const Element = ({ name }) => {
+// Déclaration des composants avant leur utilisation
+const DraggableElement = ({ name }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: ItemTypes.ELEMENT,
     item: { name },
@@ -34,7 +36,7 @@ const Element = ({ name }) => {
   );
 };
 
-const SceneElement = ({ el, index, onRemove }) => {
+const DraggableSceneElement = ({ el, index, onRemove }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: ItemTypes.ELEMENT,
     item: { index },
@@ -118,7 +120,7 @@ const Scene = ({ onDrop, elements, setElements }) => {
       }}
     >
       {elements.map((el, index) => (
-        <SceneElement key={index} el={el} index={index} onRemove={handleRemove} />
+        <DraggableSceneElement key={index} el={el} index={index} onRemove={handleRemove} />
       ))}
     </div>
   );
@@ -127,9 +129,35 @@ const Scene = ({ onDrop, elements, setElements }) => {
 const Croquis = () => {
   const [elements, setElements] = useState([]);
   const navigate = useNavigate();
+  const { updateFormData } = useContext(SinistreContext);
 
   const handleDrop = (name, offset) => {
     setElements((prev) => [...prev, { name, x: offset.x, y: offset.y }]);
+  };
+
+  const handleSave = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 800;
+    canvas.height = 500;
+    const ctx = canvas.getContext('2d');
+
+    // Dessiner le fond
+    ctx.fillStyle = '#f0f0f0';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Dessiner les éléments
+    elements.forEach(el => {
+      ctx.fillStyle = 'lightblue';
+      ctx.fillRect(el.x, el.y, 100, 30);
+      ctx.fillStyle = 'black';
+      ctx.font = '12px Arial';
+      ctx.fillText(el.name, el.x + 5, el.y + 18);
+    });
+
+    // Sauvegarder l'image
+    const croquisData = canvas.toDataURL('image/png');
+    updateFormData('croquis', croquisData);
+    navigate('/verification');
   };
 
   return (
@@ -140,25 +168,25 @@ const Croquis = () => {
         <div style={{ display: 'flex', gap: '20px' }}>
           <div style={{ minWidth: '220px' }}>
             <h4>🚗 Véhicules</h4>
-            <Element name="🚗 A" />
-            <Element name="🚗 B" />
-            <Element name="🚌 Bus" />
-            <Element name="🏍️ Moto" />
+            <DraggableElement name="🚗 A" />
+            <DraggableElement name="🚗 B" />
+            <DraggableElement name="🚌 Bus" />
+            <DraggableElement name="🏍️ Moto" />
 
             <h4>🚦 Signalisation</h4>
-            <Element name="🚦 Feu rouge" />
-            <Element name="⭕ Rond-point" />
-            <Element name="🚧 Intersection" />
+            <DraggableElement name="🚦 Feu rouge" />
+            <DraggableElement name="⭕ Rond-point" />
+            <DraggableElement name="🚧 Intersection" />
 
             <h4>🛣️ Routes</h4>
-            <Element name="➡️ Rue principale" />
-            <Element name="⬅️ Rue secondaire" />
+            <DraggableElement name="➡️ Rue principale" />
+            <DraggableElement name="⬅️ Rue secondaire" />
 
             <h4>🔀 Flèches de direction</h4>
-            <Element name="⬆️" />
-            <Element name="⬇️" />
-            <Element name="➡️" />
-            <Element name="⬅️" />
+            <DraggableElement name="⬆️" />
+            <DraggableElement name="⬇️" />
+            <DraggableElement name="➡️" />
+            <DraggableElement name="⬅️" />
 
             <p style={{ marginTop: '10px', fontStyle: 'italic' }}>
               Cliquez sur un élément dans la scène pour le supprimer.
@@ -171,8 +199,19 @@ const Croquis = () => {
         </div>
 
         <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'space-between' }}>
-          <button onClick={() => navigate('/circonstance-b')}>Précédent</button>
-          <button onClick={() => navigate('/verification')}>Suivant</button>
+          <button 
+            onClick={() => navigate('/circonstance-b')}
+            className="btn btn-secondary"
+          >
+            Précédent
+          </button>
+          <button 
+            onClick={handleSave}
+            className="btn btn-primary"
+            disabled={elements.length === 0}
+          >
+            Suivant
+          </button>
         </div>
       </div>
     </DndProvider>

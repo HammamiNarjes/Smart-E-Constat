@@ -16,6 +16,7 @@ export const saveSinistre = async (formData) => {
       societe: formData.societe || '',
       police: formData.police || '',
       circSelected: formData.circSelected || '',
+      declaration: formData.declaration || '',
 
       // Conducteur B - Champs SÉPARÉS
       nomB: formData.nomB || '',  // Champ individuel
@@ -27,6 +28,7 @@ export const saveSinistre = async (formData) => {
       societeB: formData.societeB || '',
       policeB: formData.policeB || '',
       circSelectedB: formData.circSelectedB || '',
+      declarationB: formData.declarationB || '',
 
        // Accident - 
       date: formData.date || new Date().toISOString().split('T')[0], // valeur par défaut aujourd'hui
@@ -36,9 +38,6 @@ export const saveSinistre = async (formData) => {
       blesses: blesses
     };
     
-
-
-
     console.log('Payload final envoyé:', JSON.stringify(payload, null, 2));
 
     // 3. Envoi au serveur
