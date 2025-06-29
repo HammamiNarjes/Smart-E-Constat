@@ -48,7 +48,7 @@ app.post('/api/sinistres', async (req, res) => {
   try {
     const requiredFields = [
       'nom', 'prenom', 'type', 'immatriculation', 'date', 'heure', 'lieu',
-      'degats', 'blesses', 'societe', 'police', 'permis', 'dateDelivrance', 'circSelected','chocA'
+      'degats', 'blesses', 'societe', 'police', 'permis', 'dateDelivrance', 'circSelected','chocA', 'codeAgence'
     ];
 
     const missingFields = requiredFields.filter(field => 
@@ -92,6 +92,8 @@ app.post('/api/sinistres', async (req, res) => {
       req.body.declarationB || null,
       req.body.chocA || null,
       req.body.chocB || null,
+      req.body.codeAgence || null
+
     ];
 
     client = await pool.connect();
@@ -105,8 +107,8 @@ app.post('/api/sinistres', async (req, res) => {
         circonstance_a,
         societe_assurance_b, police_assurance_b, nom_conducteur_b, prenom_conducteur_b,
         numero_permis_b, date_delivrance_permis_b, type_vehicule_b, immatriculation_b,
-        circonstance_b, declaration_a, declaration_b, point_de_choc_a, point_de_choc_b
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27)
+        circonstance_b, declaration_a, declaration_b, point_de_choc_a, point_de_choc_b, code_agence
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27,$28)
       RETURNING id;
     `;
 
@@ -131,7 +133,6 @@ app.post('/api/sinistres', async (req, res) => {
   }
 });
 
-// Route GET pour récupérer un sinistre
 app.get('/api/sinistres/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -139,7 +140,16 @@ app.get('/api/sinistres/:id', async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Sinistre non trouvé' });
     }
-    res.json(result.rows[0]);
+    
+    const sinistre = result.rows[0];
+    
+    
+    
+    res.json({
+      ...sinistre,
+      codeAgence: sinistre.code_agence || sinistre.codeAgence // Prend les deux possibilités
+    });
+    
   } catch (err) {
     console.error('Erreur:', err);
     res.status(500).json({ error: 'Erreur serveur' });
