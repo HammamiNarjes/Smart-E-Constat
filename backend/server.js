@@ -166,92 +166,108 @@ app.post('/api/analyze/:id', async (req, res) => {
         const { rows } = await pool.query('SELECT * FROM sinistres WHERE id = $1', [id]);
         if (rows.length === 0) {
             console.error(`❌ Sinistre non trouvé: ${id}`);
-            return res.status(404).json({ error: 'Sinistre non trouvé' });
+            return res.status(404).json({ 
+                success: false,
+                error: 'Sinistre non trouvé',
+                details: `Aucun sinistre avec l'ID ${id}`
+            });
         }
 
         const sinistre = rows[0];
-        console.log('📦 Données du sinistre:', {
-            id: sinistre.id,
-            date: sinistre.date_accident,
-            conducteurs: `${sinistre.nom_conducteur_a} vs ${sinistre.nom_conducteur_b}`
-        });
+        console.log('📦 Données du sinistre:', sinistre);
 
-        // 2. Correction du format de date
-        let formattedDate;
-        try {
-            // Convertir la date en format YYYY-MM-DD
-            const dateObj = new Date(sinistre.date_accident);
-            if (isNaN(dateObj.getTime())) {
-                throw new Error('Format de date invalide');
+        // 2. Formatage des données pour Flask
+        const formatDate = (date) => {
+            if (!date) return null;
+            try {
+                return new Date(date).toISOString().split('T')[0];
+            } catch (e) {
+                console.error('Erreur formatage date:', e);
+                return null;
             }
-            formattedDate = dateObj.toISOString().split('T')[0];
-            console.log(`📅 Date convertie: ${sinistre.date_accident} → ${formattedDate}`);
-        } catch (dateError) {
-            console.error('❌ Erreur conversion date:', dateError);
-            formattedDate = '1970-01-01'; // Valeur par défaut si erreur
-        }
+        };
 
-        // 3. Préparation des données pour Flask
         const predictionData = {
-            date_accident: formattedDate, // Utiliser la date corrigée
-            heure_accident: sinistre.heure_accident,
-            immatriculation_a: sinistre.immatriculation_a,
-            type_vehicule_a: sinistre.type_vehicule_a,
-            point_de_choc_a: sinistre.point_de_choc_a,
-            circonstance_a: sinistre.circonstance_a,
-            declaration_a: sinistre.declaration_a,
-            immatriculation_b: sinistre.immatriculation_b,
-            type_vehicule_b: sinistre.type_vehicule_b,
-            point_de_choc_b: sinistre.point_de_choc_b,
-            circonstance_b: sinistre.circonstance_b,
-            declaration_b: sinistre.declaration_b
+            date_accident: formatDate(sinistre.date_accident),
+            heure_accident: sinistre.heure_accident || '12:00',
+            immatriculation_a: sinistre.immatriculation_a || '',
+            type_vehicule_a: sinistre.type_vehicule_a || '',
+            point_de_choc_a: sinistre.point_de_choc_a || '',
+            circonstance_a: sinistre.circonstance_a || '',
+            declaration_a: sinistre.declaration_a || '',
+            immatriculation_b: sinistre.immatriculation_b || '',
+            type_vehicule_b: sinistre.type_vehicule_b || '',
+            point_de_choc_b: sinistre.point_de_choc_b || '',
+            circonstance_b: sinistre.circonstance_b || '',
+            declaration_b: sinistre.declaration_b || ''
         };
 
         console.log('📤 Données envoyées à Flask:', predictionData);
 
-        // 4. Appel à l'API Flask avec gestion d'erreur améliorée
-        const flaskResponse = await axios.post('http://localhost:5000/predict', predictionData, {
-            timeout: 10000,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        console.log('📥 Réponse de Flask:', flaskResponse.data);
-
-        // 5. Validation de la réponse
-        if (!flaskResponse.data || !flaskResponse.data.prediction) {
-            throw new Error('Réponse invalide du modèle Flask');
+        // 3. Appel à Flask avec gestion d'erreur améliorée
+        let flaskResponse;
+        try {
+            flaskResponse = await axios.post('http://localhost:5000/predict', predictionData, {
+                timeout: 30000,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            console.log('📥 Réponse de Flask:', flaskResponse.data);
+        } catch (flaskError) {
+            console.error('❌ Erreur Flask:', {
+                message: flaskError.message,
+                code: flaskError.code,
+                response: flaskError.response?.data
+            });
+            throw {
+                type: 'FLASK_ERROR',
+                message: 'Erreur de communication avec le service d\'analyse',
+                details: flaskError.response?.data || flaskError.message
+            };
         }
 
-        // 6. Mise à jour de la base
-        await pool.query(
-            'UPDATE sinistres SET fautif = $1 WHERE id = $2',
-            [flaskResponse.data.prediction, id]
-        );
+        // 4. Validation de la réponse Flask
+        if (!flaskResponse.data || !flaskResponse.data.prediction) {
+            throw {
+                type: 'INVALID_RESPONSE',
+                message: 'Réponse invalide du service d\'analyse',
+                details: flaskResponse.data
+            };
+        }
 
-        // 7. Réponse
+        // 5. Mise à jour de la base de données
+        try {
+            await pool.query(
+                'UPDATE sinistres SET fautif = $1 WHERE id = $2',
+                [flaskResponse.data.prediction, id]
+            );
+        } catch (dbError) {
+            console.error('Erreur DB:', dbError);
+            // On continue malgré l'erreur de DB
+        }
+
+        // 6. Réponse formatée
         res.json({
+            success: true,
             prediction: flaskResponse.data.prediction,
             probabilities: {
-                conducteur_A: Math.round(flaskResponse.data.probabilities.conducteur_A * 100),
-                conducteur_B: Math.round(flaskResponse.data.probabilities.conducteur_B * 100)
-            }
+                conducteur_A: Math.round((flaskResponse.data.probabilities?.conducteur_A || 0) * 100),
+                conducteur_B: Math.round((flaskResponse.data.probabilities?.conducteur_B || 0) * 100)
+            },
+            message: 'Analyse terminée avec succès'
         });
 
     } catch (error) {
-        console.error('❌ Erreur analyse:', {
-            message: error.message,
-            stack: error.stack,
-            response: error.response?.data
-        });
-
-        res.status(500).json({ 
-            error: 'Erreur lors de l\'analyse',
-            details: process.env.NODE_ENV === 'development' ? {
-                message: error.message,
-                flaskError: error.response?.data
-            } : undefined
+        console.error('❌ Erreur analyse:', error);
+        
+        const statusCode = error.type === 'FLASK_ERROR' ? 502 : 500;
+        
+        res.status(statusCode).json({
+            success: false,
+            error: error.message || 'Erreur lors de l\'analyse',
+            details: process.env.NODE_ENV === 'development' ? error.details : undefined,
+            timestamp: new Date().toISOString()
         });
     }
 });
